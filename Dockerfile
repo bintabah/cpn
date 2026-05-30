@@ -40,7 +40,8 @@ RUN composer install --no-interaction --optimize-autoloader
 # Install JS dependencies and compile assets
 RUN npm install && npm run production
 
-RUN if [ -z "$(grep '^APP_KEY=base64' .env 2>/dev/null)" ]; then php artisan key:generate --force; fi
+RUN [ -f .env ] || cp .env.example .env
+RUN php artisan key:generate --force
 
 # Permissions
 RUN chown -R www-data:www-data storage bootstrap/cache \
