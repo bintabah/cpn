@@ -24,11 +24,11 @@ class DossierRequest extends FormRequest
     public function rules()
     {
         return [
-            'date_derniere_regle' =>'required',
-		'dure_cycle' => 'required',
-		'groupe_sanguin' => 'required',
-		'taille_patiente' => 'required',
-		'dap' => 'required',
+            'date_derniere_regle' => 'required|date',
+            'dure_cycle'          => 'required|integer|min:21|max:45',
+            'groupe_sanguin'      => 'required|string',
+            'taille_patiente'     => 'required|numeric|min:100|max:220',
+            'dap'                 => 'required|numeric|min:1|max:30',
         ];
     }
 }

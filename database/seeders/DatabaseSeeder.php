@@ -16,23 +16,33 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $agent = AgentSante::firstOrCreate([
-            'nom'  =>'Bah',
-            'prenom'=>'Sory binta',
-            'adresse'=>'lambanyi',
-            'email' =>'hadjasorybintabah@gmail.com',
-            'telephone'=>'629901136',
-            'qualification'=>'medecin generaliste',
-        ]);
+        // Données de référence (gestations, vaccins, produits, antécédents...)
+        $this->call(ReferenceSeeder::class);
 
-        $agent->update(['admin'=> true, 'password'=>Hash::make('sangaredi2014')]);
+        // Ton compte personnel + 2 agents de test
+        $this->call(AgentSanteSeeder::class);
 
-        CategorieSituation::firstOrCreate([
-            'nom_cat_situation' => "DERNIER NÉ"
-        ]);
+        // Compte principal (propriétaire de l'app)
+        $agent = AgentSante::firstOrCreate(
+            ['email' => 'hadjasorybintabah@gmail.com'],
+            [
+                'nom'           => 'Bah',
+                'prenom'        => 'Sory binta',
+                'adresse'       => 'Lambanyi',
+                'telephone'     => '629901136',
+                'qualification' => 'Médecin généraliste',
+                'admin'         => true,
+                'password'      => Hash::make('sangaredi2014'),
+            ]
+        );
+        $agent->update(['admin' => true]);
 
-        CategorieSituation::firstOrCreate([
-            'nom_cat_situation' => "AVANT DERNIER NÉ"
-        ]);
+        CategorieSituation::firstOrCreate(['nom_cat_situation' => 'DERNIER NÉ']);
+        CategorieSituation::firstOrCreate(['nom_cat_situation' => 'AVANT DERNIER NÉ']);
+
+        // 13 patientes avec données complètes (uniquement en dev/staging)
+        if (app()->environment(['local', 'staging'])) {
+            $this->call(PatienteSeeder::class);
+        }
     }
 }

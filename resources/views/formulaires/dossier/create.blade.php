@@ -10,8 +10,8 @@
             <input class="form-control" type="date" name="date_derniere_regle" id="date_derniere_regle">
         </div>
         <div class="form-group">
-            <label for="dure_cycle">Durée du cycle</label>
-            <input class="form-control" type="text" name="dure_cycle" id="dure_cycle">
+            <label for="dure_cycle">Durée du cycle (jours)</label>
+            <input class="form-control" type="number" name="dure_cycle" id="dure_cycle" min="21" max="45" placeholder="Ex : 28">
         </div>
 
         <p>Handicap physique</p>
@@ -38,12 +38,12 @@
 
         </div>
         <div class="form-group">
-            <label for="taille_patiente">Taille de la patiente </label>
-            <input class="form-control" type="text" name="taille_patiente" id="taille_patiente">
+            <label for="taille_patiente">Taille de la patiente (cm)</label>
+            <input class="form-control" type="number" step="0.1" name="taille_patiente" id="taille_patiente" min="100" max="220" placeholder="Ex : 162">
         </div>
         <div class="form-group">
-            <label for="dap">DAP </label>
-            <input class="form-control" type="text" name="dap" id="dap">
+            <label for="dap">DAP — Diamètre antéro-postérieur (cm)</label>
+            <input class="form-control" type="number" step="0.1" name="dap" id="dap" min="1" max="30" placeholder="Ex : 10.5">
         </div>
         <button class="btn btn-success " type="submit">Enregistrer</button>
     </form>

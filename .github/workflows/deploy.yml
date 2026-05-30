@@ -1,0 +1,77 @@
+name: Deploy to Fly.io
+
+on:
+  push:
+    branches: [main, master]
+
+env:
+  FLY_APP: cpn-conakry-2024
+  FLY_DB:  cpn-app-db
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Create app (first deploy only)
+        run: flyctl apps create ${{ env.FLY_APP }} --org personal 2>/dev/null || true
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Create Postgres (first deploy only)
+        run: |
+          flyctl postgres list 2>/dev/null | grep -q "${{ env.FLY_DB }}" || \
+          flyctl postgres create \
+            --name ${{ env.FLY_DB }} \
+            --region cdg \
+            --initial-cluster-size 1 \
+            --vm-size shared-cpu-1x \
+            --volume-size 1
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Attach Postgres (first deploy only)
+        run: |
+          flyctl postgres attach ${{ env.FLY_DB }} \
+            --app ${{ env.FLY_APP }} 2>/dev/null || true
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Set Laravel secrets
+        run: |
+          flyctl secrets set \
+            APP_KEY="${{ secrets.APP_KEY }}" \
+            APP_NAME="CPN" \
+            APP_URL="https://${{ env.FLY_APP }}.fly.dev" \
+            --app ${{ env.FLY_APP }} 2>/dev/null || true
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Deploy
+        run: flyctl deploy --remote-only --app ${{ env.FLY_APP }}
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Run migrations
+        run: |
+          flyctl ssh console \
+            --app ${{ env.FLY_APP }} \
+            --command "php artisan migrate --force"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Seed reference data
+        run: |
+          flyctl ssh console \
+            --app ${{ env.FLY_APP }} \
+            --command "php artisan db:seed --force"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

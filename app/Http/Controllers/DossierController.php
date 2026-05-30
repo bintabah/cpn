@@ -77,11 +77,11 @@ class DossierController extends Controller
 
         try {
             send_sms($dossier->patient->telephone_patient, $message);
-            return back()->with('message',"enregistrement reussi");
-        } catch (\GuzzleHttp\Exception\ConnectException $th) {
-            $dossier->delete();
-            return back()->with('message',"Aucune connexion internet, impossible d'enregistrer le dossier");
+        } catch (\Throwable $th) {
+            // SMS failure must not block registration (no connectivity in local/dev)
         }
+
+        return back()->with('message', "Enregistrement réussi");
 
 
     }
