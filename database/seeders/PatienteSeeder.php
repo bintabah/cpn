@@ -21,14 +21,28 @@ class PatienteSeeder extends Seeder
 
     public function run()
     {
+        if (DB::table('patient')->exists()) {
+            return;
+        }
+
         $faker = Faker::create('fr_FR');
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
         $antecedentsMedicaux = [
             [3, 'Drépanocytose AS (trait dépistée en 2020)'],
             [2, 'Hypertension artérielle traitée'],
             [1, 'Diabète gestationnel lors de la grossesse précédente'],
             [4, 'Asthme léger intermittent sous Salbutamol'],
+        ];
+
+        $antecedentsChirurgicaux = [
+            [5, 'Appendicectomie en 2018'],
+            [6, 'Césarienne lors de la dernière grossesse'],
+        ];
+
+        $antecedentsGynecos = [
+            [8, 'Avortement spontané (fausse couche précoce)'],
+            [9, 'GEU traitée médicalement'],
+            [10, 'Pré-éclampsie lors de la grossesse précédente'],
         ];
 
         for ($i = 1; $i <= 13; $i++) {
@@ -60,16 +74,7 @@ class PatienteSeeder extends Seeder
             $dateAccouchement = (clone $derniereRegle)->modify('+9 months');
             $semaines        = $faker->numberBetween(8, 30);
 
-            // Plan d'accouchement (placeholder id_dossier=0, mis à jour après)
-            $idAccouchement = DB::table('plan_accouchement')->insertGetId([
-                'lieu_accouchement'   => $faker->randomElement($this->maternites),
-                'moyens_transport'    => $faker->randomElement($this->transports),
-                'personne_responsable'=> $faker->randomElement($this->prenomH) . ' ' . $faker->randomElement($this->noms),
-                'accompagant'         => $faker->randomElement($this->accompagnants),
-                'id_dossier'          => 0,
-            ]);
-
-            // Dossier
+            // Dossier d'abord (id_accouchement nullable)
             $idDossier = DB::table('dossier_patient')->insertGetId([
                 'numero_dossier'      => 'CPN-' . date('Y') . '-' . str_pad($i, 3, '0', STR_PAD_LEFT),
                 'date_enregistrement' => $enregistrement->format('Y-m-d'),
@@ -82,12 +87,21 @@ class PatienteSeeder extends Seeder
                 'taille_patiente'     => $faker->randomFloat(1, 148, 178),
                 'dap'                 => $faker->randomFloat(1, 8.5, 12.5),
                 'id_patient'          => $idPatient,
-                'id_accouchement'     => $idAccouchement,
+                'id_accouchement'     => null,
             ]);
 
-            // Lier le plan au vrai dossier
-            DB::table('plan_accouchement')->where('id_accouchement', $idAccouchement)
-                ->update(['id_dossier' => $idDossier]);
+            // Plan d'accouchement avec le vrai id_dossier
+            $idAccouchement = DB::table('plan_accouchement')->insertGetId([
+                'lieu_accouchement'    => $faker->randomElement($this->maternites),
+                'moyens_transport'     => $faker->randomElement($this->transports),
+                'personne_responsable' => $faker->randomElement($this->prenomH) . ' ' . $faker->randomElement($this->noms),
+                'accompagant'          => $faker->randomElement($this->accompagnants),
+                'id_dossier'           => $idDossier,
+            ]);
+
+            // Lier le plan au dossier
+            DB::table('dossier_patient')->where('id_dossier', $idDossier)
+                ->update(['id_accouchement' => $idAccouchement]);
 
             // Consultations (2 à 4)
             $nbConsult = $faker->numberBetween(2, 4);
@@ -162,13 +176,50 @@ class PatienteSeeder extends Seeder
                 'date_prochain_rdv'=> (clone $enregistrement)->modify('+4 weeks')->format('Y-m-d'),
             ]);
 
-            // Antécédent médical (1 patiente sur 2)
-            if ($i % 2 === 0) {
-                [$idAnt, $valeur] = $faker->randomElement($antecedentsMedicaux);
-                DB::table('dossier_patient_antecedent')->insert([
-                    'id_antecedent'    => $idAnt,
-                    'id_dossier'       => $idDossier,
-                    'valeur_antecedent'=> $valeur,
+            // Antécédents — toutes les patientes en ont au moins un médical
+            [$idAnt, $valeur] = $faker->randomElement($antecedentsMedicaux);
+            DB::table('dossier_patient_antecedent')->insert([
+                'id_antecedent'     => $idAnt,
+                'id_dossier'        => $idDossier,
+                'valeur_antecedent' => $valeur,
+            ]);
+
+            // Antécédent chirurgical (1 sur 3)
+            if ($i % 3 === 0) {
+                [$idAnt, $valeur] = $faker->randomElement($antecedentsChirurgicaux);
+                DB::table('dossier_patient_antecedent')->insertOrIgnore([
+                    'id_antecedent'     => $idAnt,
+                    'id_dossier'        => $idDossier,
+                    'valeur_antecedent' => $valeur,
+                ]);
+            }
+
+            // Antécédent gynéco-obstétrical (1 sur 4)
+            if ($i % 4 === 0) {
+                [$idAnt, $valeur] = $faker->randomElement($antecedentsGynecos);
+                DB::table('dossier_patient_antecedent')->insertOrIgnore([
+                    'id_antecedent'     => $idAnt,
+                    'id_dossier'        => $idDossier,
+                    'valeur_antecedent' => $valeur,
+                ]);
+            }
+
+            // Situations des enfants précédents (si multipare)
+            $nbAccouch = (int) DB::table('dossier_patient_gestation')
+                ->where('id_dossier', $idDossier)
+                ->where('id_gestation', 1)
+                ->value('valeur_gestation');
+
+            for ($k = 1; $k <= min($nbAccouch, 3); $k++) {
+                $vivant = $faker->boolean(85);
+                DB::table('situation')->insert([
+                    'numero'               => $k,
+                    'sexe_enfant'          => $faker->randomElement(['M', 'F']),
+                    'vivant'               => $vivant,
+                    'age_enfant'           => $vivant ? $faker->numberBetween(1, 10) : 0,
+                    'cause_deces'          => $vivant ? null : 'P',
+                    'id_dossier'           => $idDossier,
+                    'id_categorie_situation' => 2,
                 ]);
             }
 
@@ -180,8 +231,6 @@ class PatienteSeeder extends Seeder
             ]);
         }
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
-        $this->command->info('✅ 13 patientes créées avec consultations, gestations, antécédents et rendez-vous.');
+        $this->command->info('✅ 13 patientes créées avec dossiers, plans, consultations, antécédents, situations et rendez-vous.');
     }
 }

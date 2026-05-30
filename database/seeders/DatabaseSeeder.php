@@ -40,9 +40,6 @@ class DatabaseSeeder extends Seeder
         CategorieSituation::firstOrCreate(['nom_cat_situation' => 'DERNIER NÉ']);
         CategorieSituation::firstOrCreate(['nom_cat_situation' => 'AVANT DERNIER NÉ']);
 
-        // 13 patientes avec données complètes (uniquement en dev/staging)
-        if (app()->environment(['local', 'staging'])) {
-            $this->call(PatienteSeeder::class);
-        }
+        $this->call(PatienteSeeder::class);
     }
 }
