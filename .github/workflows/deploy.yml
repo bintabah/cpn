@@ -51,7 +51,8 @@ jobs:
             APP_KEY="${{ secrets.APP_KEY }}" \
             APP_NAME="CPN" \
             APP_URL="https://${{ env.FLY_APP }}.fly.dev" \
-            --app ${{ env.FLY_APP }} 2>/dev/null || true
+            --app ${{ env.FLY_APP }} \
+            --detach 2>/dev/null || true
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
