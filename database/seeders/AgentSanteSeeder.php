@@ -10,7 +10,7 @@ class AgentSanteSeeder extends Seeder
 {
     public function run()
     {
-        DB::table('agent_sante')->insert([
+        DB::table('agent_sante')->insertOrIgnore([
             [
                 'nom'           => 'Admin',
                 'prenom'        => 'Super',

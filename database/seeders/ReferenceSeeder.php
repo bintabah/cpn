@@ -9,14 +9,14 @@ class ReferenceSeeder extends Seeder
 {
     public function run()
     {
-        DB::table('categorie_antecedent')->insert([
+        DB::table('categorie_antecedent')->insertOrIgnore([
             ['nom_cat_antecedent' => 'Médicaux'],
             ['nom_cat_antecedent' => 'Chirurgicaux'],
             ['nom_cat_antecedent' => 'Familiaux'],
             ['nom_cat_antecedent' => 'Gynéco-obstétricaux'],
         ]);
 
-        DB::table('antecedent')->insert([
+        DB::table('antecedent')->insertOrIgnore([
             ['nom' => 'Diabète',          'id_categorie_antecedent' => 1],
             ['nom' => 'Hypertension',     'id_categorie_antecedent' => 1],
             ['nom' => 'Drépanocytose',    'id_categorie_antecedent' => 1],
@@ -29,13 +29,13 @@ class ReferenceSeeder extends Seeder
             ['nom' => 'Pré-éclampsie',    'id_categorie_antecedent' => 4],
         ]);
 
-        DB::table('categorie_situation')->insert([
+        DB::table('categorie_situation')->insertOrIgnore([
             ['nom_cat_situation' => 'G'],
             ['nom_cat_situation' => 'P'],
             ['nom_cat_situation' => 'A'],
         ]);
 
-        DB::table('gestation')->insert([
+        DB::table('gestation')->insertOrIgnore([
             ['nom_gestation' => "Nombre d'accouchements(parite)"],
             ['nom_gestation' => "Nombre d'avortements"],
             ['nom_gestation' => "Nombre total d'enfants nés-vivants"],
@@ -44,7 +44,7 @@ class ReferenceSeeder extends Seeder
             ['nom_gestation' => "Observations"],
         ]);
 
-        DB::table('vaccin')->insert([
+        DB::table('vaccin')->insertOrIgnore([
             ['nom_vaccin' => 'VAT1', 'periodicite' => '4 semaines'],
             ['nom_vaccin' => 'VAT2', 'periodicite' => '4 semaines'],
             ['nom_vaccin' => 'VAT3', 'periodicite' => '6 mois'],
@@ -52,7 +52,7 @@ class ReferenceSeeder extends Seeder
             ['nom_vaccin' => 'VAT5', 'periodicite' => '1 an'],
         ]);
 
-        DB::table('produit')->insert([
+        DB::table('produit')->insertOrIgnore([
             ['nom_produit' => 'Fer'],
             ['nom_produit' => 'Acide folique'],
             ['nom_produit' => 'Mébendazole'],
