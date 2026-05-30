@@ -66,7 +66,7 @@ class PatienteSeeder extends Seeder
                 'secteur_mari'       => $faker->randomElement($this->quartiers),
                 'profession_mari'    => $faker->randomElement($this->profH),
                 'telephone_mari'     => '6' . $faker->numberBetween(20, 29) . $faker->numerify('######'),
-            ]);
+            ], 'id_patient');
 
             // Dates
             $enregistrement  = $faker->dateTimeBetween('-7 months', '-2 months');
@@ -88,7 +88,7 @@ class PatienteSeeder extends Seeder
                 'dap'                 => $faker->randomFloat(1, 8.5, 12.5),
                 'id_patient'          => $idPatient,
                 'id_accouchement'     => null,
-            ]);
+            ], 'id_dossier');
 
             // Plan d'accouchement avec le vrai id_dossier
             $idAccouchement = DB::table('plan_accouchement')->insertGetId([
@@ -97,7 +97,7 @@ class PatienteSeeder extends Seeder
                 'personne_responsable' => $faker->randomElement($this->prenomH) . ' ' . $faker->randomElement($this->noms),
                 'accompagant'          => $faker->randomElement($this->accompagnants),
                 'id_dossier'           => $idDossier,
-            ]);
+            ], 'id_accouchement');
 
             // Lier le plan au dossier
             DB::table('dossier_patient')->where('id_dossier', $idDossier)
@@ -134,7 +134,7 @@ class PatienteSeeder extends Seeder
                     'siege'                  => $faker->boolean(5) ? 1 : 0,
                     'gemellaire'             => 0,
                     'id_dossier'             => $idDossier,
-                ]);
+                ], 'id_consultation');
 
                 DB::table('consultation_agent_sante')->insert([
                     'id_agent'       => $faker->randomElement([1, 2, 3]),
