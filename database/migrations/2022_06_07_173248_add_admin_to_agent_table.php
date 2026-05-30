@@ -13,9 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('agent_sante', function (Blueprint $table) {
-            $table->boolean('admin')->default(false);
-        });
+        if (!Schema::hasColumn('agent_sante', 'admin')) {
+            Schema::table('agent_sante', function (Blueprint $table) {
+                $table->boolean('admin')->default(false);
+            });
+        }
     }
 
     /**
