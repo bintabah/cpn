@@ -40,7 +40,7 @@ RUN composer install --no-interaction --optimize-autoloader
 # Install JS dependencies and compile assets
 RUN npm install && npm run production
 
-RUN [ -f .env ] || cp .env.example .env
+RUN [ -f .env ] || cp env.example .env
 RUN php artisan key:generate --force
 
 # Permissions
