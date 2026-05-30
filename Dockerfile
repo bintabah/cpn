@@ -3,7 +3,7 @@ FROM php:8.0-apache
 # System dependencies
 RUN apt-get update && apt-get install -y \
     git curl zip unzip \
-    libpng-dev libonig-dev libxml2-dev libzip-dev \
+    libpng-dev libonig-dev libxml2-dev libzip-dev libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions
