@@ -104,6 +104,17 @@
                         </form>
                         <!-- end form-->
 
+                        <!-- Accès démo -->
+                        <div class="mt-3 p-3 rounded" style="background:#f1f3fa;border:1px solid #dee2e6;">
+                            <p class="mb-1 font-weight-bold text-dark" style="font-size:13px;">
+                                <i class="mdi mdi-account-key mr-1"></i>Accès démo
+                            </p>
+                            <p class="mb-1 text-muted" style="font-size:12px;">
+                                <strong>Email :</strong> admin@cpn.com<br>
+                                <strong>Mot de passe :</strong> demo1234
+                            </p>
+                        </div>
+
                         <!-- Footer-->
                         <footer class="footer footer-alt">
 

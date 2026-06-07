@@ -10,7 +10,7 @@ class AgentSanteSeeder extends Seeder
 {
     public function run()
     {
-        DB::table('agent_sante')->insertOrIgnore([
+        $agents = [
             [
                 'nom'           => 'Admin',
                 'prenom'        => 'Super',
@@ -18,7 +18,7 @@ class AgentSanteSeeder extends Seeder
                 'email'         => 'admin@cpn.com',
                 'telephone'     => '620000000',
                 'qualification' => 'Administrateur',
-                'password'      => Hash::make('password123'),
+                'password'      => Hash::make('demo1234'),
                 'admin'         => true,
             ],
             [
@@ -28,7 +28,7 @@ class AgentSanteSeeder extends Seeder
                 'email'         => 'aissatou.diallo@cpn.com',
                 'telephone'     => '621100001',
                 'qualification' => 'Sage-femme',
-                'password'      => Hash::make('password123'),
+                'password'      => Hash::make('demo1234'),
                 'admin'         => false,
             ],
             [
@@ -38,9 +38,19 @@ class AgentSanteSeeder extends Seeder
                 'email'         => 'ibrahima.camara@cpn.com',
                 'telephone'     => '622200002',
                 'qualification' => 'Médecin',
-                'password'      => Hash::make('password123'),
+                'password'      => Hash::make('demo1234'),
                 'admin'         => false,
             ],
-        ]);
+        ];
+
+        foreach ($agents as $agent) {
+            $existing = DB::table('agent_sante')->where('email', $agent['email'])->first();
+            if ($existing) {
+                DB::table('agent_sante')->where('email', $agent['email'])
+                    ->update(['password' => $agent['password']]);
+            } else {
+                DB::table('agent_sante')->insert($agent);
+            }
+        }
     }
 }
